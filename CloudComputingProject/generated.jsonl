@@ -1,9 +1,0 @@
-{'id': 'oxEmwICDAE', 'location': '(22, 9)', 'time': '07/22/24 22:50:26', 'temp': 18, 'acidity': 14, 'nutrients': ['very low', 'average', 'high', 'high', 'very high', 'very high'], 'water-level': 14.0}
-{'id': 'HmiSsRYNDh', 'time': '07/22/24 22:50:26', 'watered?': False, 'sprayed?': False}
-{'id': '1uAbRX2nEg', 'location': '(21, 22)', 'time': '07/22/24 22:50:26', 'type': 'weevil', 'species': 'deer'}
-{'id': 'Jcl0tX0Nzl', 'location': '(10, 7)', 'time': '07/22/24 22:50:26', 'temp': 88, 'acidity': 3, 'nutrients': ['very high', 'average', 'very low', 'low', 'very low', 'low'], 'water-level': 18.6}
-{'id': 'tqGUjzAjFd', 'time': '07/22/24 22:50:26', 'watered?': False, 'sprayed?': False}
-{'id': '8gRGytzLlY', 'location': '(7, 19)', 'time': '07/22/24 22:50:26', 'type': 'sawfly', 'species': 'deer'}
-{'id': 'PbG9SicrL4', 'location': '(4, 7)', 'time': '07/22/24 22:50:26', 'temp': -3, 'acidity': 0, 'nutrients': ['low', 'very high', 'high', 'very high', 'average', 'low'], 'water-level': 13.5}
-{'id': 'oGIBVJGq44', 'time': '07/22/24 22:50:26', 'watered?': False, 'sprayed?': False}
-{'id': 'wGZveO7JSx', 'location': '(23, 5)', 'time': '07/22/24 22:50:26', 'type': 'borer', 'species': 'deer'}
