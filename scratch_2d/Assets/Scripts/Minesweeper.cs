@@ -1,6 +1,8 @@
 using UnityEngine;
 using System;
 using System.Collections.Generic;
+using UnityEngine.UI;
+using UnityEditor;
 
 public enum Tile
 {
@@ -22,9 +24,11 @@ public class Minesweeper : MonoBehaviour
     private static int[] EASYSTATS = {9, 9, 10};
     private static int[] MEDISTATS = {16, 16, 40};
     private static int[] HARDSTATS = {16, 30, 99};
+    private static int SCREENSIZE = 1200;
 
     public GameObject coverAnchor;
     public GameObject landAnchor;
+    public GameObject sampleRow;
 
     [Header("Difficulty")]
     public bool easy;
@@ -75,11 +79,38 @@ public class Minesweeper : MonoBehaviour
         }
         minesLeft = mines;
 
-        // init correct size visually here
+        spawnTiles();
 
         map = new List<List<Tile>>{};
         numberMap = new List<List<int>>{};
         randCoor = new List<Tuple<int, int>>{};
+    }
+
+    private void spawnTiles(){
+        Sprite sprite = Resources.Load<Sprite>("tile");
+        float tileSizeH = SCREENSIZE / height; //i think it scales? idk
+        float tileSizeW = SCREENSIZE / width;
+        
+        for (int i=0; i<height; i++){
+            GameObject row = GameObjectUtility.DuplicateGameObject(sampleRow);
+            row.name = "row" + i;
+            // row.transform.SetParent(coverAnchor.transform);
+
+            for (int j=0; j<width; j++){
+                GameObject tile = new GameObject();
+                tile.name = "tile" + j;
+                Button tib = tile.AddComponent<Button>();
+                Image tii = tile.AddComponent<Image>();
+                tii.sprite = sprite;
+                (int, int) ack = (i, j);
+                tib.onClick.AddListener(() => click(ack.Item1, ack.Item2));
+                tile.GetComponent<RectTransform>().sizeDelta = new Vector2(tileSizeW, tileSizeH);
+                tile.transform.SetParent(row.transform);
+                tile.SetActive(true);
+            }
+            row.SetActive(true);
+        }
+        Destroy(sampleRow);
     }
 
     //it's loops all the way down
@@ -142,7 +173,6 @@ public class Minesweeper : MonoBehaviour
                 check.se = false;
             }
 
-            // Debug.Log(curr.Item1 + " (" +  (numberMap.Count) + ") " + curr.Item2 + " (" + (numberMap[curr.Item1].Count) + ")");
             if (check.nw){
                 if (numberMap[curr.Item1-1][curr.Item2-1] < 0){
                     count++;
@@ -194,6 +224,7 @@ public class Minesweeper : MonoBehaviour
     }
 
     public void click(int x, int y){
+        Debug.Log(x + " " + y);
         if (map.Count == 0){
             generateMap(x, y);
             return;
