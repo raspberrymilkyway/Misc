@@ -49,6 +49,7 @@ public class Minesweeper : MonoBehaviour
     private int width;
     private int height;
     private int minesLeft;
+    private int minesMax;
 
     private List<List<Tile>> map;
     private List<List<int>> numberMap;
@@ -102,11 +103,18 @@ public class Minesweeper : MonoBehaviour
         
         if (mines < 1){
             mines = 1;
+            minesLeft = mines;
+            minesMax = mines;
         }
         else if (mines > height * width){
             mines = height * width;
+            minesLeft = mines-1;
+            minesMax = mines-1;
         }
-        minesLeft = mines;
+        else {
+            minesLeft = mines;
+            minesMax = mines;
+        }
 
         spawnCoverTiles();
 
@@ -221,7 +229,7 @@ public class Minesweeper : MonoBehaviour
         int t = 0;
         for (; mines>0; mines--){
             Tuple<int, int> curr = randCoor[t];
-            if (minesLeft == height * width){
+            if (minesMax == height * width-1){
                 if (curr.Item1 == x && curr.Item2 == y){
                     t++;
                     continue;
@@ -319,6 +327,9 @@ public class Minesweeper : MonoBehaviour
 
     public void click(int x, int y, bool right){
         if (map.Count == 0){
+            if (right){
+                return;
+            }
             generateMap(x, y, right);
             return;
         }
@@ -331,10 +342,13 @@ public class Minesweeper : MonoBehaviour
             if (coverVisible[x][y] == Cover.Solid){
                 img.sprite = Resources.Load<Sprite>("flag");
                 coverVisible[x][y] = Cover.Flag;
+                minesLeft--;
+                checkWin();
             }
             else if (coverVisible[x][y] == Cover.Flag){
                 img.sprite = Resources.Load<Sprite>("tile");
                 coverVisible[x][y] = Cover.Solid;
+                minesLeft++;
             }
             return;
         }
@@ -470,6 +484,18 @@ public class Minesweeper : MonoBehaviour
         // if size change available, check here.
         // i don't think i'm going to bother implementing this here
         // i'm probably going to edit it from the vanilla version anyway, so there's no real point.
+    }
+
+    private void checkWin(){
+        for (int i=0; i<height; i++){
+            for (int j=0; j<width; j++){
+                if (coverVisible[i][j] == Cover.Solid){
+                    return;
+                }
+            }
+        }
+        Debug.Log("Game Won!");
+        removeCover();
     }
 
     private void _reshuffleMines(){

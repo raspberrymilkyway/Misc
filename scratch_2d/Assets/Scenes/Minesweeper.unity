@@ -612,8 +612,8 @@ MonoBehaviour:
   medium: 1
   hard: 0
   customizeOn: 0
-  heightCount: 12
-  widthCount: 12
+  heightCount: 5
+  widthCount: 5
   mineCount: 150
 --- !u!1 &1408431742
 GameObject:
