@@ -20,13 +20,7 @@ public enum Cover
     Flag
 }
 
-//hmm there's definitely math to spawning this
-// but i don't know it
-// come back and rework this at some point!
-
-// not gonna check for playability right now
-// simply randomizing locations.
-// ...bomb clusters are bad though, fix that.
+//
 
 public class Minesweeper : MonoBehaviour
 {
@@ -93,14 +87,14 @@ public class Minesweeper : MonoBehaviour
         if (height < 4){
             height = 4;
         }
-        else if (height > 150){
-            height = 150;
+        else if (height > 50){
+            height = 50;
         }
         if (width < 4){
             width = 4;
         }
-        else if (width > 150){
-            width = 150;
+        else if (width > 50){
+            width = 50;
         }
         tileSizeH = SCREENSIZE / height; //i think it scales?
         tileSizeW = SCREENSIZE / width;
@@ -110,7 +104,7 @@ public class Minesweeper : MonoBehaviour
             mines = 1;
         }
         else if (mines > height * width){
-            mines = height * width - 1;
+            mines = height * width;
         }
         minesLeft = mines;
 
@@ -227,8 +221,14 @@ public class Minesweeper : MonoBehaviour
         int t = 0;
         for (; mines>0; mines--){
             Tuple<int, int> curr = randCoor[t];
-            if (curr.Item1 == x && curr.Item2 == y){
-                //no bombs at current click
+            if (minesLeft == height * width){
+                if (curr.Item1 == x && curr.Item2 == y){
+                    t++;
+                    continue;
+                }
+            }
+            else if ((curr.Item1 == x || curr.Item1 == x+1 || curr.Item1 == x-1) && (curr.Item2 == y || curr.Item2 == y+1 || curr.Item2 == y-1)){
+                //no bombs at current click - start with empty square
                 t++;
                 continue;
             }
@@ -350,15 +350,14 @@ public class Minesweeper : MonoBehaviour
             removeCover();
         }
         else if (map[x][y] == Tile.Empty){
-            Debug.Log("Empty");
             if (_adjacentCovers != null){
                 StopCoroutine(adjacentEmpty(x, y));
             }
             _adjacentCovers = StartCoroutine(adjacentEmpty(x, y));
         }
-        else{
-            Debug.Log("Number " + numberMap[x][y]);
-        }
+        // else{
+        //     Debug.Log("Number " + numberMap[x][y]);
+        // }
     }
 
     private void removeCover(){
@@ -370,7 +369,7 @@ public class Minesweeper : MonoBehaviour
             }
         }
     }
-    private IEnumerator adjacentEmpty(int x, int y, string prevDirection=""){
+    private IEnumerator adjacentEmpty(int x, int y){
         Check check = new Check();
         if (x == 0){
             check.w = false;
@@ -392,74 +391,74 @@ public class Minesweeper : MonoBehaviour
             check.se = false;
             check.sw = false;
         }
-        Debug.Log(x + " " + y);
+
 
         if (check.n){
             if (coverVisible[x][y-1] == Cover.Solid){
                 _replaceImageEmpty(x, y-1);
                 if (numberMap[x][y-1] == 0){
-                    yield return adjacentEmpty(x, y-1, "s");
+                    yield return adjacentEmpty(x, y-1);
                 }
-                // else{
-                //     _checkDirectionsEndpoint(check, x, y-1, prevDirection);
-                // }
             }
         }
         if (check.e){
             if (coverVisible[x+1][y] == Cover.Solid){
                 _replaceImageEmpty(x+1, y);
                 if (numberMap[x+1][y] == 0){
-                    yield return adjacentEmpty(x+1, y, "w");
+                    yield return adjacentEmpty(x+1, y);
                 }
-                // else{
-                //     _checkDirectionsEndpoint(check, x+1, y, prevDirection);
-                // }
             }
         }
         if (check.s){
             if (coverVisible[x][y+1] == Cover.Solid){
                 _replaceImageEmpty(x, y+1);
                 if (numberMap[x][y+1] == 0){
-                    yield return adjacentEmpty(x, y+1, "n");
+                    yield return adjacentEmpty(x, y+1);
                 }
-                // else{
-                //     _checkDirectionsEndpoint(check, x, y+1, prevDirection);
-                // }
             }
         }
         if (check.w){
             if (coverVisible[x-1][y] == Cover.Solid){
                 _replaceImageEmpty(x-1, y);
                 if (numberMap[x-1][y] == 0){
-                    yield return adjacentEmpty(x-1, y, "e");
+                    yield return adjacentEmpty(x-1, y);
                 }
-                // else{
-                //     _checkDirectionsEndpoint(check, x-1, y, prevDirection);
-                // }
             }
         }
-        // if (numberMap[x][y] == 0){
-        //     if (check.nw){
-        //         if (coverVisible[x-1][y-1] == Cover.Solid){
-        //             _replaceImageEmpty(x-1, y-1);
-        //         }
-        //     }
-        //     if (check.sw){
-        //         if (coverVisible[x-1][y+1] == Cover.Solid){
-        //             _replaceImageEmpty(x-1, y+1);
-        //         }
-        //     }
-        //     if (check.se){
-        //         if (coverVisible[x+1][y+1] == Cover.Solid){
-        //             _replaceImageEmpty(x+1, y+1);
-        //         }
-        //     }
-        //     if (check.ne){
-        //         if (coverVisible[x+1][y-1] == Cover.Solid){
-        //             _replaceImageEmpty(x+1, y-1);
-        //         }
-        //     }
-        // }
+        if (numberMap[x][y] == 0){
+            if (check.nw){
+                if (coverVisible[x-1][y-1] == Cover.Solid){
+                    _replaceImageEmpty(x-1, y-1);
+                    if (numberMap[x-1][y-1] == 0){
+                        yield return adjacentEmpty(x-1, y-1);
+                    }
+                }
+            }
+            if (check.sw){
+                if (coverVisible[x-1][y+1] == Cover.Solid){
+                    _replaceImageEmpty(x-1, y+1);
+                    if (numberMap[x-1][y+1] == 0){
+                        yield return adjacentEmpty(x-1, y+1);
+                    }
+                }
+            }
+            if (check.se){
+                if (coverVisible[x+1][y+1] == Cover.Solid){
+                    _replaceImageEmpty(x+1, y+1);
+                    if (numberMap[x+1][y+1] == 0){
+                        yield return adjacentEmpty(x+1, y+1);
+                    }
+                }
+            }
+            if (check.ne){
+                if (coverVisible[x+1][y-1] == Cover.Solid){
+                    _replaceImageEmpty(x+1, y-1);
+                    if (numberMap[x+1][y-1] == 0){
+                        yield return adjacentEmpty(x+1, y-1);
+                    }
+                }
+            }
+        }
         yield return null;
     }
 
@@ -469,7 +468,8 @@ public class Minesweeper : MonoBehaviour
         randCoor = new List<Tuple<int, int>>{};
         
         // if size change available, check here.
-        // reset screen, but i'm not really handling any of that yet
+        // i don't think i'm going to bother implementing this here
+        // i'm probably going to edit it from the vanilla version anyway, so there's no real point.
     }
 
     private void _reshuffleMines(){
@@ -486,26 +486,6 @@ public class Minesweeper : MonoBehaviour
         Image img = coverAnchor.transform.GetChild(x).GetChild(y).GetComponent<Image>();
         img.sprite = Resources.Load<Sprite>("empty");
         coverVisible[x][y] = Cover.Off;
-    }
-    private void _checkDirectionsEndpoint(Check check, int x, int y, string prevDirection){
-        // this doesn't work right
-        // direction's probably mixed somewhere
-        if (prevDirection.Equals("s") || prevDirection.Equals("n")){
-            if (check.e){
-                _replaceImageEmpty(x+1, y);
-            }
-            if (check.w){
-                _replaceImageEmpty(x-1, y);
-            }
-        }
-        else if (prevDirection.Equals("e") || prevDirection.Equals("w")){
-            if (check.s){
-                _replaceImageEmpty(x, y+1);
-            }
-            if (check.n){
-                _replaceImageEmpty(x, y-1);
-            }
-        }
     }
 }
 

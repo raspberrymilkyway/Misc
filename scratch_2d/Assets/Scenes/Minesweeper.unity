@@ -608,13 +608,13 @@ MonoBehaviour:
   landAnchor: {fileID: 810852912}
   sampleCoverRow: {fileID: 2008944705}
   sampleLandRow: {fileID: 931819026}
-  easy: 1
-  medium: 0
+  easy: 0
+  medium: 1
   hard: 0
   customizeOn: 0
-  heightCount: 0
-  widthCount: 0
-  mineCount: 0
+  heightCount: 12
+  widthCount: 12
+  mineCount: 150
 --- !u!1 &1408431742
 GameObject:
   m_ObjectHideFlags: 0
