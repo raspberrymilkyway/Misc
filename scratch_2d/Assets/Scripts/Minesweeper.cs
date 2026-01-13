@@ -136,7 +136,7 @@ public class Minesweeper : MonoBehaviour
                 // Button tib = tile.AddComponent<Button>();
                 LRClickButton tib = (LRClickButton)tile.AddComponent(typeof(IHatJHat.UI.LRClickButton));
                 Image tii = tile.AddComponent<Image>();
-                tii.sprite = Resources.Load<Sprite>("tile");
+                tii.sprite = Resources.Load<Sprite>("minesweeper/tile");
                 (int, int) ack = (i, j);
                 tib.OnLeftClick.AddListener(() => click(ack.Item1, ack.Item2, false));
                 tib.OnRightClick.AddListener(() => click(ack.Item1, ack.Item2, true));
@@ -162,37 +162,37 @@ public class Minesweeper : MonoBehaviour
                 //handle image
                 switch (numberMap[i][j]){
                     case 0:
-                        tii.sprite = Resources.Load<Sprite>("0");
+                        tii.sprite = Resources.Load<Sprite>("minesweeper/0");
                         break;
                     case 1:
-                        tii.sprite = Resources.Load<Sprite>("1");
+                        tii.sprite = Resources.Load<Sprite>("minesweeper/1");
                         break;
                     case 2:
-                        tii.sprite = Resources.Load<Sprite>("2");
+                        tii.sprite = Resources.Load<Sprite>("minesweeper/2");
                         break;
                     case 3:
-                        tii.sprite = Resources.Load<Sprite>("3");
+                        tii.sprite = Resources.Load<Sprite>("minesweeper/3");
                         break;
                     case 4:
-                        tii.sprite = Resources.Load<Sprite>("4");
+                        tii.sprite = Resources.Load<Sprite>("minesweeper/4");
                         break;
                     case 5:
-                        tii.sprite = Resources.Load<Sprite>("5");
+                        tii.sprite = Resources.Load<Sprite>("minesweeper/5");
                         break;
                     case 6:
-                        tii.sprite = Resources.Load<Sprite>("6");
+                        tii.sprite = Resources.Load<Sprite>("minesweeper/6");
                         break;
                     case 7:
-                        tii.sprite = Resources.Load<Sprite>("7");
+                        tii.sprite = Resources.Load<Sprite>("minesweeper/7");
                         break;
                     case 8:
-                        tii.sprite = Resources.Load<Sprite>("8");
+                        tii.sprite = Resources.Load<Sprite>("minesweeper/8");
                         break;
                     case 9:
-                        tii.sprite = Resources.Load<Sprite>("9");
+                        tii.sprite = Resources.Load<Sprite>("minesweeper/9");
                         break;
                     default:
-                        tii.sprite = Resources.Load<Sprite>("mine");
+                        tii.sprite = Resources.Load<Sprite>("minesweeper/mine");
                         break;
                 }
 
@@ -340,13 +340,13 @@ public class Minesweeper : MonoBehaviour
         Image img = coverAnchor.transform.GetChild(x).GetChild(y).GetComponent<Image>();
         if (right){
             if (coverVisible[x][y] == Cover.Solid){
-                img.sprite = Resources.Load<Sprite>("flag");
+                img.sprite = Resources.Load<Sprite>("minesweeper/flag");
                 coverVisible[x][y] = Cover.Flag;
                 minesLeft--;
                 checkWin();
             }
             else if (coverVisible[x][y] == Cover.Flag){
-                img.sprite = Resources.Load<Sprite>("tile");
+                img.sprite = Resources.Load<Sprite>("minesweeper/tile");
                 coverVisible[x][y] = Cover.Solid;
                 minesLeft++;
             }
@@ -357,7 +357,7 @@ public class Minesweeper : MonoBehaviour
         }
 
         coverVisible[x][y] = Cover.Off;
-        img.sprite = Resources.Load<Sprite>("empty");
+        img.sprite = Resources.Load<Sprite>("minesweeper/empty");
 
         if (map[x][y] == Tile.Mine){
             Debug.Log("Game Over");
@@ -378,7 +378,7 @@ public class Minesweeper : MonoBehaviour
         for (int i=0; i<height; i++){
             for (int j=0; j<width; j++){
                 Image img = coverAnchor.transform.GetChild(i).GetChild(j).GetComponent<Image>();
-                img.sprite = Resources.Load<Sprite>("empty");
+                img.sprite = Resources.Load<Sprite>("minesweeper/empty");
                 coverVisible[i][j] = Cover.Off;
             }
         }
@@ -510,7 +510,7 @@ public class Minesweeper : MonoBehaviour
 
     private void _replaceImageEmpty(int x, int y){
         Image img = coverAnchor.transform.GetChild(x).GetChild(y).GetComponent<Image>();
-        img.sprite = Resources.Load<Sprite>("empty");
+        img.sprite = Resources.Load<Sprite>("minesweeper/empty");
         coverVisible[x][y] = Cover.Off;
     }
 }
