@@ -17,7 +17,7 @@ public class PlantsMovement : EventTrigger
     private int ICONWIDTH = 125;
     private int ICONHEIGHT = 175;
 
-    private string info = "";
+    public string info = "";
 
     void Start(){
         //https://docs.unity3d.com/2019.1/Documentation/ScriptReference/EventSystems.EventTrigger.html
