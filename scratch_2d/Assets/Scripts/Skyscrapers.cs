@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using System;
 using UnityEditor;
+using TMPro;
 
 public class Skyscrapers : MonoBehaviour
 {
@@ -23,22 +24,24 @@ public class Skyscrapers : MonoBehaviour
     public int buildingsPerRow = 4; // n x n grid
     public int nilPerRow = 0;
 
-    //otherwise, int arrays for each col/row
-    // ...can i make unity display int[,] in a menu?
-
     private float tileSize;
     private int[] arrowsN;
     private int[] arrowsE;
     private int[] arrowsS;
     private int[] arrowsW;
     private int[][] skyscrapers;
+    private int[][] userSkyscrapers;
     //oh this should maybe have a pencil option
 
     void Start(){
         tileSize = SCREENSIZE / (buildingsPerRow+4);
 
-        if (!custom){
+        // if (!custom){
             loadFile();
+        // }
+        userSkyscrapers = new int[skyscrapers.Length][];
+        for (int i=0; i<skyscrapers.Length; i++){
+            userSkyscrapers[i] = new int[skyscrapers[0].Length];
         }
         spawnTiles();
     }
@@ -169,7 +172,7 @@ public class Skyscrapers : MonoBehaviour
                 }
                 else{
                     scrap.transform.SetParent(row.transform);
-                    scrapText(scrap);
+                    scrapText(scrap, i, j-1);
                     scrapi.sprite = Resources.Load<Sprite>("skyscrapers/arrowNil");
                     //...size is automatic(ally 0) until given a reason to exist.
                     scrapi.color = new Color32(0, 0, 0, 0);
@@ -182,16 +185,60 @@ public class Skyscrapers : MonoBehaviour
         Destroy(sampleInputField);
     }
 
-    private void scrapText(GameObject scrap){
+    private void scrapText(GameObject scrap, int i, int j){
         GameObject inp = GameObjectUtility.DuplicateGameObject(sampleInputField);
         RectTransform rt = inp.GetComponent<RectTransform>();
         rt.sizeDelta = new Vector2(tileSize, tileSize);
         inp.transform.SetParent(scrap.transform);
         rt.transform.localPosition = new Vector3(0,0,0);
+        inp.GetComponent<TMP_InputField>().onValueChanged.AddListener(delegate{updateFilled(inp, i, j);});
         inp.SetActive(true);
     }
 
-    private void checkGrid(){
-        //
+    private bool checkAllFilled(){
+        Debug.Log("\n");
+        for (int i=0; i<userSkyscrapers.Length; i++){
+            string s = "";
+            for (int j=0; j<userSkyscrapers[i].Length; j++){
+                s += userSkyscrapers[i][j].ToString() + " ";
+                if (userSkyscrapers[i][j] < 1){
+                    return false;
+                }
+            }
+            Debug.Log(s);
+        }
+        return true;
+    }
+
+    private bool checkGrid(){
+        for (int i=0; i<userSkyscrapers.Length; i++){
+            for (int j=0; j<userSkyscrapers[i].Length; j++){
+                if (userSkyscrapers[i][j] != skyscrapers[i][j]){
+                    Debug.Log("not correct");
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    private void win(){
+        Debug.Log("Game over - you win!");
+    }
+
+    public void updateFilled(GameObject go, int i, int j){
+        if (go == null){
+            return;
+        }
+        string num = go.GetComponent<TMP_InputField>().text;
+        if (num.Length < 1 || num.Equals("-")){
+            userSkyscrapers[i][j] = 0;
+        }
+        else{
+            userSkyscrapers[i][j] = Int32.Parse(num);
+        }
+        if (checkAllFilled() && checkGrid()){
+            win();
+        }
     }
 }
