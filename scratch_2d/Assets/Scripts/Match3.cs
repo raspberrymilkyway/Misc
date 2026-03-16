@@ -1,7 +1,9 @@
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
 using UnityEditor;
 using System.Collections.Generic;
+using IHatJHat.UI;
 
 public class Match3 : MonoBehaviour
 {
@@ -28,6 +30,12 @@ public class Match3 : MonoBehaviour
     private float tileSizeH;
     private float tileSizeW;
     private int[] imageCount;
+    private GameObject selected;
+    private GameObject sup;
+    private GameObject sdown;
+    private GameObject sleft;
+    private GameObject sright;
+    private ColorBlock cb;
 
     // this would need an "any more moves" checker
 
@@ -89,6 +97,7 @@ public class Match3 : MonoBehaviour
         tileSizeH = SCREENSIZE / gridHeight;
         tileSizeW = SCREENSIZE / gridWidth;
         imageCount = new int[imageNames.Length];
+        _resetSelected();
 
         initGrid();
     }
@@ -105,7 +114,15 @@ public class Match3 : MonoBehaviour
                 Image imi = img.AddComponent<Image>();
                 imi.sprite = Resources.Load<Sprite>("match3/" + _pickImage());
                 img.GetComponent<RectTransform>().sizeDelta = new Vector2(tileSizeW, tileSizeH);
-
+                LRClickButton bu = (LRClickButton)img.AddComponent(typeof(IHatJHat.UI.LRClickButton));
+                bu.OnLeftClick.AddListener(() => selectTile(img));
+                bu.OnRightClick.AddListener(() => deselectTile(img));
+                if (j == 0 && i == 0){
+                    cb = bu.colors;
+                    cb.selectedColor = new Color32(149, 149, 149, 255);
+                }
+                bu.colors = cb;
+                
                 // add drag n drop - modify plantsmovement
 
                 img.transform.SetParent(col.transform);
@@ -114,6 +131,67 @@ public class Match3 : MonoBehaviour
             col.SetActive(true);
         }
         Destroy(sampleColumn);
+    }
+
+    public void selectTile(GameObject go){
+        if (selected == null){
+            _setSelected(go);
+            //uhh maybe add selected color or anim or something? idk
+        }
+        else if (go == selected){
+            deselectTile(go);
+        }
+        else{
+            if (go == sup || go == sdown || go == sleft || go == sright){
+                Image goi = go.GetComponent<Image>();
+                Image sei = selected.GetComponent<Image>();
+                if (goi.sprite == sei.sprite){
+                    //invalid
+                    Debug.Log("invalid (same image)");
+                    _resetSelected();
+                    return;
+                }
+                Debug.Log("matches");
+                Sprite tmp = goi.sprite;
+                goi.sprite = sei.sprite;
+                sei.sprite = tmp;
+                //check for match
+                _resetSelected();
+            }
+            else{
+                _setSelected(go);
+            }
+        }
+    }
+    public void deselectTile(GameObject go){
+        if (selected == go){
+            _resetSelected();
+            // end any color or animation
+        }
+    }
+
+    private void _checkForMatch(GameObject go){
+        // tbd
+    }
+    
+    private void _setSelected(GameObject go){
+        selected = go;
+        Selectable s = selected.GetComponent<Selectable>().FindSelectableOnUp();
+        sup = s == null ? null : s.gameObject;
+        s = selected.GetComponent<Selectable>().FindSelectableOnDown();
+        sdown = s == null ? null : s.gameObject;
+        s = selected.GetComponent<Selectable>().FindSelectableOnLeft();
+        sleft = s == null ? null : s.gameObject;
+        s = selected.GetComponent<Selectable>().FindSelectableOnRight();
+        sright = s == null ? null : s.gameObject;
+    }
+    private void _resetSelected(){
+        selected = null;
+        sup = null;
+        sdown = null;
+        sleft = null;
+        sright = null;
+        EventSystem.current.SetSelectedGameObject(null);
     }
 
     private void _reshuffleImages(){
