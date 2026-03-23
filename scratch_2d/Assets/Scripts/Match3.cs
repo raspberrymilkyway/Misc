@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using UnityEditor;
+using System;
 using System.Collections.Generic;
 using IHatJHat.UI;
 
@@ -37,11 +38,15 @@ public class Match3 : MonoBehaviour
     private GameObject sright;
     private ColorBlock cb;
 
+    private Dictionary<GameObject, bool> matches;
+
     // this would need an "any more moves" checker
 
     // i made this with h and w as different values, potentially
     // but it looks terrible and should not be done like that
     // this needs to be square or the sizes should be calculated differently
+
+    // this would be easier with a series of 3d objects instead of a canvas
 
     //min. 3 images
     private string[] images = {"circle", "diamond", "heart", "square", "star", "triangle"};
@@ -97,6 +102,7 @@ public class Match3 : MonoBehaviour
         tileSizeH = SCREENSIZE / gridHeight;
         tileSizeW = SCREENSIZE / gridWidth;
         imageCount = new int[imageNames.Length];
+        matches = new Dictionary<GameObject, bool>();
         _resetSelected();
 
         initGrid();
@@ -151,11 +157,11 @@ public class Match3 : MonoBehaviour
                     _resetSelected();
                     return;
                 }
-                Debug.Log("matches");
                 Sprite tmp = goi.sprite;
                 goi.sprite = sei.sprite;
                 sei.sprite = tmp;
-                //check for match
+
+                _checkForMatch(go);
                 _resetSelected();
             }
             else{
@@ -171,9 +177,127 @@ public class Match3 : MonoBehaviour
     }
 
     private void _checkForMatch(GameObject go){
-        // tbd
+        // check both
+        _checkAdjacents(go);
+        _checkAdjacents(selected);
+
+        foreach (KeyValuePair<GameObject, bool> kvp in matches){
+            kvp.Key.GetComponent<Image>().sprite = Resources.Load<Sprite>("match3/empty_forTesting");
+        }
     }
-    
+    private void _checkAdjacents(GameObject go){
+        // check if it's on the edge
+        Selectable ul = go.GetComponent<Selectable>().FindSelectableOnUp();
+        _checkToList(go, ul, "up");
+        Selectable dr = go.GetComponent<Selectable>().FindSelectableOnDown();
+        _checkToList(go, dr, "down");
+        // check if it's in the middle
+        Sprite im = null;
+        if (ul != null){
+            im = ul.gameObject.GetComponent<Image>().sprite;
+            if (dr != null && im == dr.gameObject.GetComponent<Image>().sprite && im == go.GetComponent<Image>().sprite){
+                try{
+                    matches.Add(go, false);
+                } catch (ArgumentException){
+                    //
+                }
+                try{
+                    matches.Add(ul.gameObject, false);
+                } catch (ArgumentException){
+                    //
+                }
+                try{
+                    matches.Add(dr.gameObject, false);
+                } catch (ArgumentException){
+                    //
+                }
+            }
+        }
+
+        // edges
+        ul = go.GetComponent<Selectable>().FindSelectableOnLeft();
+        _checkToList(go, ul, "left");
+        dr = go.GetComponent<Selectable>().FindSelectableOnRight();
+        _checkToList(go, dr, "right");
+        // middle
+        if (ul != null){
+            im = ul.gameObject.GetComponent<Image>().sprite;
+            if (dr != null && im == dr.gameObject.GetComponent<Image>().sprite && im == go.GetComponent<Image>().sprite){
+                try{
+                    matches.Add(go, false);
+                } catch (ArgumentException){
+                    //
+                }
+                try{
+                    matches.Add(ul.gameObject, false);
+                } catch (ArgumentException){
+                    //
+                }
+                try{
+                    matches.Add(dr.gameObject, false);
+                } catch (ArgumentException){
+                    //
+                }
+            }
+        }
+    }
+    private bool _checkNext(GameObject go, string direction){
+        Selectable s = go.GetComponent<Selectable>();
+        if (direction == "up"){
+            s = s.FindSelectableOnUp();
+        }
+        else if (direction == "down"){
+            s = s.FindSelectableOnDown();
+        }
+        else if (direction == "left"){
+            s = s.FindSelectableOnLeft();
+        }
+        else if (direction == "right"){
+            s = s.FindSelectableOnRight();
+        }
+        else{
+            s = null;
+        }
+
+        if (s != null && s.gameObject.GetComponent<Image>().sprite == go.GetComponent<Image>().sprite){
+            return true;
+        }
+
+        return false;
+    }
+    private void _checkToList(GameObject go, Selectable s, string direction){
+        if (s != null && _checkNext(go, direction) && _checkNext(s.gameObject, direction)){
+            try{
+                matches.Add(go, false);
+            } catch (ArgumentException){
+                //
+            }
+            try{
+                matches.Add(s.gameObject, false);
+            } catch (ArgumentException){
+                //
+            }
+            try{
+                switch (direction){
+                    case "up":
+                        matches.Add(s.gameObject.GetComponent<Selectable>().FindSelectableOnUp().gameObject, false);
+                        break;
+                    case "down":
+                        matches.Add(s.gameObject.GetComponent<Selectable>().FindSelectableOnDown().gameObject, false);
+                        break;
+                    case "left":
+                        matches.Add(s.gameObject.GetComponent<Selectable>().FindSelectableOnLeft().gameObject, false);
+                        break;
+                    case "right":
+                        matches.Add(s.gameObject.GetComponent<Selectable>().FindSelectableOnRight().gameObject, false);
+                        break;
+                }
+            } catch (ArgumentException){
+                //
+            }
+        }
+    }
+
     private void _setSelected(GameObject go){
         selected = go;
         Selectable s = selected.GetComponent<Selectable>().FindSelectableOnUp();
@@ -192,6 +316,7 @@ public class Match3 : MonoBehaviour
         sleft = null;
         sright = null;
         EventSystem.current.SetSelectedGameObject(null);
+        matches = new Dictionary<GameObject, bool>();
     }
 
     private void _reshuffleImages(){
