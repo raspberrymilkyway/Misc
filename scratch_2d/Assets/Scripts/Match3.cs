@@ -41,6 +41,7 @@ public class Match3 : MonoBehaviour
     private Dictionary<GameObject, bool> matches;
 
     // this would need an "any more moves" checker
+    // it should also have something checking for initial matches
 
     // i made this with h and w as different values, potentially
     // but it looks terrible and should not be done like that
@@ -180,9 +181,47 @@ public class Match3 : MonoBehaviour
         // check both
         _checkAdjacents(go);
         _checkAdjacents(selected);
+        
+        if (matches.Count > 0){
+            foreach (KeyValuePair<GameObject, bool> kvp in matches){
+                //could adjust count here for spawning, but...
+                // i'm not really sure how it'll balance out..?
+                kvp.Key.GetComponent<Image>().sprite = Resources.Load<Sprite>("match3/empty_forTesting");
+            }
 
-        foreach (KeyValuePair<GameObject, bool> kvp in matches){
-            kvp.Key.GetComponent<Image>().sprite = Resources.Load<Sprite>("match3/empty_forTesting");
+            bool cont = true;
+            List<GameObject> objs = new List<GameObject>(matches.Keys); //shouldn't be bigger than 7 items, i think
+            while (cont){
+                for (int i=0; i<objs.Count; i++){
+                    Selectable up = objs[i].GetComponent<Selectable>().FindSelectableOnUp();
+                    if (up != null){
+                        Sprite comp = Resources.Load<Sprite>("match3/empty_forTesting");
+                        Image oi = objs[i].GetComponent<Image>();
+                        Image ui = up.gameObject.GetComponent<Image>();
+                        if (oi.sprite == ui.sprite){
+                            //same image
+                            if (oi.sprite != comp){
+                                objs[i] = up.gameObject;
+                            }
+                            continue;
+                        }
+                        Sprite tmp = oi.sprite;
+                        oi.sprite = ui.sprite;
+                        ui.sprite = tmp;
+                        objs[i] = up.gameObject;
+                    }
+                    else{
+                        cont = false;
+                        break;
+                    }
+                }
+                if (!cont){
+                    break;
+                }
+            }
+            for (int i=0; i<objs.Count; i++){
+                objs[i].GetComponent<Image>().sprite = Resources.Load<Sprite>("match3/" + _pickImage());
+            }
         }
     }
     private void _checkAdjacents(GameObject go){
