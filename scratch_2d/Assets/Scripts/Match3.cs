@@ -42,12 +42,17 @@ public class Match3 : MonoBehaviour
 
     // this would need an "any more moves" checker
     // it should also have something checking for initial matches
+    // also doesn't handle drag n drop
+    //    (setup would be similar to plants, but i don't know that i'll use this approach in an actual minigame)
 
     // i made this with h and w as different values, potentially
     // but it looks terrible and should not be done like that
     // this needs to be square or the sizes should be calculated differently
 
     // this would be easier with a series of 3d objects instead of a canvas
+    // this would also be easier to... i used searchables for moving tiles and spawning
+    //    but it'd be easier to just. delete the object and spawn a new one at the top of the column
+    //    which was my initial plan. probably harder to add any kind of animation to that style though
 
     //min. 3 images
     private string[] images = {"circle", "diamond", "heart", "square", "star", "triangle"};
