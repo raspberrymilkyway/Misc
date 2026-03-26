@@ -15,8 +15,10 @@ public class Wanted : MonoBehaviour
     public static Wanted wanted;
     
     public GameObject spawnAnchor;
+    public GameObject spawnAnchorNoGrid;
     public int spawnMax = 50;
 
+    // movement doesn't work like this yet
     private string[] movementStyle = {"none", "diagonalLeft", "right", "waves", "random"};
     private float[] movementSpeed = {0.15f, 0.3f, 0.45f, 0.6f, 0.75f, 0.9f};
     private string path = "wanted/";
@@ -55,7 +57,62 @@ public class Wanted : MonoBehaviour
                 b.onClick.AddListener(() => target());
             }
 
+            WantedMovement wm = (WantedMovement)tar.AddComponent(typeof(WantedMovement));
+            if (i%2 == 0){
+                wm.setSpin(true, false, 0.2f, -1);
+                //movement and growth don't work inside layout
+            }
+
             tar.transform.SetParent(spawnAnchor.transform);
+            tar.SetActive(true);
+        }
+
+        float currX = 0f;
+        float currY = 0f;
+        // we'll call it a baby grid
+        for (int i=0; i<itlPoss.Count; i++){
+            GameObject tar = new GameObject();
+            tar.name = itlPoss[i] + i;
+
+            Image eimg = tar.AddComponent<Image>();
+            eimg.sprite = Resources.Load<Sprite>(path + itlPoss[i]);
+
+            
+            RectTransform rt = tar.GetComponent<RectTransform>();
+            if (currX == 0f){
+                currX = rt.rect.width + 5f;
+            }
+            if (currY == 0f){
+                currY = rt.rect.height + 5f;
+            }
+
+            tar.transform.position = new Vector3(currX, currY, 0);
+            currX += rt.rect.width + 5f;
+            if ((currX + 5f) > spawnAnchorNoGrid.GetComponent<RectTransform>().rect.width){
+                currX = rt.rect.width + 5f;
+                currY += rt.rect.height + 5f;
+            }
+
+            if (i == buttonIndex){
+                Button b = tar.AddComponent<Button>();
+                b.onClick.AddListener(() => target());
+            }
+
+            WantedMovement wm = (WantedMovement)tar.AddComponent(typeof(WantedMovement));
+            if (i == itlPoss.Count-1){
+                wm.setGrow(true, 0, 0.2f, 2f, 0.5f);
+            }
+            else if (i%4 == 0){
+                wm.setSpin(true, false, 0.2f, -1);
+            }
+            else if (i% 4 == 2){
+                wm.setSpin(true, true, 0.2f, -1);
+            }
+            else if (i%3 == 0){
+                wm.setMove(true, true, 1.047198f, 2f); //5f is kinda fast
+            }
+
+            tar.transform.SetParent(spawnAnchorNoGrid.transform);
             tar.SetActive(true);
         }
     }
@@ -64,9 +121,18 @@ public class Wanted : MonoBehaviour
         int tag = UnityEngine.Random.Range(0, poss.Length);
         int ct = rand.Next(5, spawnMax);
         bool tagless = true;
+        int[] possCt = new int[poss.Length];
 
         for (int t=0; t<ct; t++){
-            int choice = rand.Next(6);
+            int choice = rand.Next(poss.Length);
+            if (t >= ct-poss.Length){
+                for (int i=0; i<possCt.Length; i++){
+                    if (possCt[i] < 2 && choice != tag){
+                        choice = i;
+                        break;
+                    }
+                }
+            }
             if (choice == tag){
                 if (tagless){
                     tagless = false;
@@ -77,6 +143,7 @@ public class Wanted : MonoBehaviour
                 }
             }
             itlPoss.Add(poss[choice]);
+            possCt[choice] += 1;
         }
     }
 }
