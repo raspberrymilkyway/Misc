@@ -63,6 +63,7 @@ public class WantedMovement : MonoBehaviour
         if (moveDist.keepMoving){
             // too far? keep bounds
             // this allows like... half the image off-screen, i think
+            // https://stackoverflow.com/a/70970228
             if (transform.position.x < Screen.safeArea.xMin){
                 transform.position = new Vector3(Screen.safeArea.xMax, transform.position.y, 0);
             }

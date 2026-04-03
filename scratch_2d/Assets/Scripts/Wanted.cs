@@ -14,7 +14,6 @@ public class Wanted : MonoBehaviour
     //   spawn points, but probably don't want that in actual
     public static Wanted wanted;
     
-    public GameObject spawnAnchor;
     public GameObject spawnAnchorNoGrid;
     public int spawnMax = 50;
 
@@ -45,28 +44,6 @@ public class Wanted : MonoBehaviour
     }
 
     protected internal void loadImages(){
-        for (int i=0; i<itlPoss.Count; i++){
-            GameObject tar = new GameObject();
-            tar.name = itlPoss[i] + i;
-
-            Image eimg = tar.AddComponent<Image>();
-            eimg.sprite = Resources.Load<Sprite>(path + itlPoss[i]);
-
-            if (i == buttonIndex){
-                Button b = tar.AddComponent<Button>();
-                b.onClick.AddListener(() => target());
-            }
-
-            WantedMovement wm = (WantedMovement)tar.AddComponent(typeof(WantedMovement));
-            if (i%2 == 0){
-                wm.setSpin(true, false, 0.2f, -1);
-                //movement and growth don't work inside layout
-            }
-
-            tar.transform.SetParent(spawnAnchor.transform);
-            tar.SetActive(true);
-        }
-
         float currX = 0f;
         float currY = 0f;
         // we'll call it a baby grid
@@ -99,16 +76,16 @@ public class Wanted : MonoBehaviour
             }
 
             WantedMovement wm = (WantedMovement)tar.AddComponent(typeof(WantedMovement));
-            if (i == itlPoss.Count-1){
+            if (i%5 == 0){
                 wm.setGrow(true, 0, 0.2f, 2f, 0.5f);
             }
-            else if (i%4 == 0){
+            if (i%4 == 0){
                 wm.setSpin(true, false, 0.2f, -1);
             }
-            else if (i% 4 == 2){
+            else if (i%4 == 2){
                 wm.setSpin(true, true, 0.2f, -1);
             }
-            else if (i%3 == 0){
+            if (i%3 == 0){
                 wm.setMove(true, true, 1.047198f, 2f); //5f is kinda fast
             }
 
@@ -119,7 +96,7 @@ public class Wanted : MonoBehaviour
 
     private void randSpawns(){
         int tag = UnityEngine.Random.Range(0, poss.Length);
-        int ct = rand.Next(5, spawnMax);
+        int ct = rand.Next(poss.Length*2, spawnMax);
         bool tagless = true;
         int[] possCt = new int[poss.Length];
 
@@ -127,11 +104,14 @@ public class Wanted : MonoBehaviour
             int choice = rand.Next(poss.Length);
             if (t >= ct-poss.Length){
                 for (int i=0; i<possCt.Length; i++){
-                    if (possCt[i] < 2 && choice != tag){
+                    if (possCt[i] < 2 && i != tag){
                         choice = i;
                         break;
                     }
                 }
+            }
+            if (tagless && ct-t == 1){
+                choice = tag;
             }
             if (choice == tag){
                 if (tagless){
