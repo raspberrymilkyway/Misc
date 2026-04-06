@@ -18,8 +18,8 @@ public class Wanted : MonoBehaviour
     public int spawnMax = 50;
 
     // movement doesn't work like this yet
-    private string[] movementStyle = {"none", "diagonalLeft", "right", "waves", "random"};
-    private float[] movementSpeed = {0.15f, 0.3f, 0.45f, 0.6f, 0.75f, 0.9f};
+    private string[] movementStyle = {"diagonalLeft", "sine", "clock", "sawtooth", "random"};
+    private float[] movementSpeed = {0.3f, 0.45f, 0.6f, 0.75f, 0.9f, 1.05f, 1.2f, 1.35f, 1.5f, 1.65f, 1.8f, 1.95f};
     private string path = "wanted/";
     private string[] poss = {"red", "orange", "yellow", "green", "blue", "purple"};
 
@@ -31,6 +31,7 @@ public class Wanted : MonoBehaviour
     void Start(){
         wanted = this;
         rand = new System.Random();
+        //update poss here
         randSpawns();
         loadImages();
     }
@@ -86,7 +87,8 @@ public class Wanted : MonoBehaviour
                 wm.setSpin(true, true, 0.2f, -1);
             }
             if (i%3 == 0){
-                wm.setMove(true, true, 1.047198f, 2f); //5f is kinda fast
+                // wm.setMoveDist(true, true, 1.047198f, movementSpeed[rand.Next(movementSpeed.Length)]); //5f is kinda fast
+                wm.setMoveStyle(true, movementSpeed[rand.Next(movementSpeed.Length)], movementStyle[rand.Next(0, movementStyle.Length)]);
             }
 
             tar.transform.SetParent(spawnAnchorNoGrid.transform);

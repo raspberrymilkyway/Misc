@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using System;
+using System.Collections.Generic;
 
 [RequireComponent(typeof(RectTransform))]
 public class WantedMovement : MonoBehaviour
@@ -10,17 +11,43 @@ public class WantedMovement : MonoBehaviour
     // i could use these for both wanted and like. hidden object
 
     //give this established images
+
+    // sawtooth needs to be slower. the movement looks super fast gmao
     
     private (bool spin, bool dir, float speed, int turnCount) spinDir = (false, false, 0f, 0); //false for anti, true for clockwise
     private (bool grow, int dir, float interval) growDir = (false, 0, 0f); //-1 shrink, 0 grow and shrink, 1 grow
     private (bool move, bool keepMoving, float angle, float dist) moveDist = (false, false, 0f, 0f); //angle is in radians, apparently
+    private (bool move, float dist, string style) moveStyle = (false,  0f, ""); //styles: see Wanted styles
     private int spinCount = 0;
     private float growMax = 2f;
     private float growMin = 0.5f;
     private bool growing = true;
     private bool cont = true;
     private bool setIni = false;
+    private int stylei = -1;
+    private int movei = 0;
+    private int rep = 0;
     private Vector3 ini;
+    private System.Random rand;
+
+    private List<List<float>> styles = new List<List<float>>{
+        new List<float>{2.356194f}, //diagonal left
+        new List<float>{}, //sine - offset, not angle. generate at start
+        new List<float>{0f, 1.570796f, 0f, -1.570796f}, //clock
+        new List<float>{1.047198f, -1.047198f, -1.047198f, 1.047198f}, //sawtooth
+        new List<float>{}  //random - generate at start
+    };
+
+    void Start(){
+        rand = new System.Random();
+        styles[1].Add((float)(rand.NextDouble()-0.5)*2); //offset between -1 and 1
+        
+        int ct = rand.Next(3, 20);
+        for (int i=0; i<ct; i++){
+            double v = (rand.NextDouble() - 0.5)* 2;
+            styles[styles.Count-1].Add((float)v * 6.283185f);
+        }
+    }
     
     void Update(){
         if (spinDir.spin && (spinDir.turnCount < 0 || spinCount < spinDir.turnCount)){
@@ -61,25 +88,25 @@ public class WantedMovement : MonoBehaviour
             this.GetComponent<RectTransform>().sizeDelta = new Vector3 (x, y, 1f);
         }
         if (moveDist.keepMoving){
-            // too far? keep bounds
-            // this allows like... half the image off-screen, i think
-            // https://stackoverflow.com/a/70970228
-            if (transform.position.x < Screen.safeArea.xMin){
-                transform.position = new Vector3(Screen.safeArea.xMax, transform.position.y, 0);
+            move((double)moveDist.angle, moveDist.dist);
+        }
+        else if (moveStyle.move){
+            if (stylei == 0){
+                move((double)styles[stylei][0], moveStyle.dist);
             }
-            else if (transform.position.x >= Screen.safeArea.xMax){
-                transform.position = new Vector3(Screen.safeArea.xMin, transform.position.y, 0);
+            else if (stylei == 1){
+                sine((double)Time.time * 2f + styles[stylei][0], moveStyle.dist, 4f);
             }
-            if (transform.position.y <= Screen.safeArea.yMin){
-                 transform.position = new Vector3(transform.position.x, Screen.safeArea.yMax, 0);
+            else if (stylei == 2){
+                clock((double)styles[stylei][movei%styles[stylei].Count], moveStyle.dist);
             }
-            else if (transform.position.y >= Screen.safeArea.yMax){
-                transform.position = new Vector3(transform.position.x, Screen.safeArea.yMin, 0);
+            else if (stylei == 3){
+                sawtooth((double)styles[stylei][movei%styles[stylei].Count], moveStyle.dist);
             }
-
-            double sin = Math.Sin((double)moveDist.angle)*moveDist.dist;
-            double cos = Math.Cos((double)moveDist.angle)*moveDist.dist;
-            transform.position = transform.position + new Vector3((float)cos, (float)sin, 0);
+            else{ // this usually looks pretty ugly. not really sure what i was going for
+                float d = (float)(rand.NextDouble() * (moveStyle.dist*1.25) + 0.5);
+                move((double)styles[stylei][movei%styles[stylei].Count], d);
+            }
         }
     }
 
@@ -100,7 +127,9 @@ public class WantedMovement : MonoBehaviour
         growing = true;
         cont = true;
     }
-    protected internal void setMove(bool move, bool keepMoving, float angle, float distance){
+
+    // move dist and style cannot both be run at once! pick one.
+    protected internal void setMoveDist(bool move, bool keepMoving, float angle, float distance){
         moveDist = (move, keepMoving, angle, distance);
         if (move && !keepMoving){
             //go ahead and scoot
@@ -108,6 +137,26 @@ public class WantedMovement : MonoBehaviour
             double cos = Math.Cos((double)moveDist.angle)*moveDist.dist;
             transform.position = transform.position + new Vector3((float)cos, (float)sin, 0);
         }
+    }
+    protected internal void setMoveStyle(bool move, float distance, string style){
+        moveStyle = (move, distance, style);
+        movei = 0;
+        if (style.Equals("diagonalLeft")){
+            stylei = 0;
+        }
+        else if (style.Equals("sine") || style.Equals("wave") || style.Equals("sin")){
+            stylei = 1;
+        }
+        else if (style.Equals("clock")){
+            stylei = 2;
+        }
+        else if (style.Equals("sawtooth")){
+            stylei = 3;
+        }
+        else{ //random
+            stylei = 4;
+        }
+        Debug.Log(transform.name + " " + style);
     }
 
     protected internal void stopSpin(){
@@ -119,5 +168,54 @@ public class WantedMovement : MonoBehaviour
     protected internal void stopMove(){
         moveDist.move = false;
         moveDist.keepMoving = false;
+        moveStyle.move = false;
+        movei = 0;
+    }
+
+    private void move(double angle, float distance){
+        checkBounds();
+        double sin = Math.Sin(angle)*distance;
+        double cos = Math.Cos(angle)*distance;
+        transform.position = transform.position + new Vector3((float)cos, (float)sin, 0);
+    }
+    private void sine(double angle, float distance, float dividend=1f){
+        //dividend bc the sine wave can be a little big, but the x distance shouldn't change
+        checkBounds();
+        transform.position = transform.position + new Vector3(distance, (float)Math.Sin(angle) * distance/dividend, 0);
+    }
+    private void clock(double angle, float distance){
+        checkBounds();
+        if (rep == 100){
+            rep = 0;
+            movei++;
+        }
+        float f = (float)(Math.Sin(angle) * distance);
+        transform.position = transform.position + new Vector3(distance, f, 0);
+        rep++;
+    }
+    private void sawtooth(double angle, float distance){
+        if (rep == 100){
+            rep = 0;
+            movei++;
+        }
+        move(angle, distance);
+        rep++;
+    }
+    private void checkBounds(){
+        // too far? keep bounds
+        // this allows like... half the image off-screen, i think
+        // https://stackoverflow.com/a/70970228
+        if (transform.position.x < Screen.safeArea.xMin){
+            transform.position = new Vector3(Screen.safeArea.xMax, transform.position.y, 0);
+        }
+        else if (transform.position.x >= Screen.safeArea.xMax){
+            transform.position = new Vector3(Screen.safeArea.xMin, transform.position.y, 0);
+        }
+        if (transform.position.y <= Screen.safeArea.yMin){
+                transform.position = new Vector3(transform.position.x, Screen.safeArea.yMax, 0);
+        }
+        else if (transform.position.y >= Screen.safeArea.yMax){
+            transform.position = new Vector3(transform.position.x, Screen.safeArea.yMin, 0);
+        }
     }
 }
