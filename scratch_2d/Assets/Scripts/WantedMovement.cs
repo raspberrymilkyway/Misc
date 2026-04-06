@@ -37,6 +37,7 @@ public class WantedMovement : MonoBehaviour
         new List<float>{1.047198f, -1.047198f, -1.047198f, 1.047198f}, //sawtooth
         new List<float>{}  //random - generate at start
     };
+    private string[] stylesNames = new string[]{"diagonalLeft", "sine", "clock", "sawtooth", "random"};
 
     void Start(){
         rand = new System.Random();
@@ -141,22 +142,8 @@ public class WantedMovement : MonoBehaviour
     protected internal void setMoveStyle(bool move, float distance, string style){
         moveStyle = (move, distance, style);
         movei = 0;
-        if (style.Equals("diagonalLeft")){
-            stylei = 0;
-        }
-        else if (style.Equals("sine") || style.Equals("wave") || style.Equals("sin")){
-            stylei = 1;
-        }
-        else if (style.Equals("clock")){
-            stylei = 2;
-        }
-        else if (style.Equals("sawtooth")){
-            stylei = 3;
-        }
-        else{ //random
-            stylei = 4;
-        }
-        Debug.Log(transform.name + " " + style);
+        int o = Array.IndexOf(stylesNames, style);
+        stylei =  o >= 0 ? o : stylesNames.Length-1;
     }
 
     protected internal void stopSpin(){
