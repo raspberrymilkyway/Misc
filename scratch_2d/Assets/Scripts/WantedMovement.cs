@@ -24,6 +24,7 @@ public class WantedMovement : MonoBehaviour
     private bool growing = true;
     private bool cont = true;
     private bool setIni = false;
+    private int mult = 1;
     private int stylei = -1;
     private int movei = 0;
     private int rep = 0;
@@ -53,10 +54,6 @@ public class WantedMovement : MonoBehaviour
     void Update(){
         if (spinDir.spin && (spinDir.turnCount < 0 || spinCount < spinDir.turnCount)){
             //does this acutally match with speed?
-            int mult = 1;
-            if (!spinDir.dir){
-                mult = -1;
-            }
             transform.eulerAngles = new Vector3(0, 0, transform.eulerAngles.z + spinDir.speed * mult);
             spinCount++;
         }
@@ -114,6 +111,7 @@ public class WantedMovement : MonoBehaviour
     protected internal void setSpin(bool spin, bool direction, float speed, int turnCount){
         spinDir = (spin, direction, speed, turnCount);
         spinCount = 0;
+        mult = direction ? -1 : 1;
     }
     protected internal void setGrow(bool grow, int direction, float interval, float maxGrow=0f, float minGrow=0f){
         // please pass grow cap if growing and shrink cap if shrinking

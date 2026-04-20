@@ -1,0 +1,8 @@
+string imagePath, bool presentLeft, bool presentRight, float leftX, float leftY, float sizeX, float sizeY, bool needsInvisibleButton
+wanted/blue, true, true, 0, 0, 100, 100, false
+wanted/blue, true, true, 100, 100, 100, 100, false
+wanted/green, true, false, 200, 200, 100, 100, true
+wanted/purple, false, true, 300, 300, 100, 100, true
+wanted/blue, true, true, 350, 350, 100, 100, false
+wanted/red, true, false, 400, 200, 100, 100, false
+wanted/orange, false, true, 400, 200, 100, 100, false
