@@ -20,7 +20,8 @@ public class SpotTheDifference : MonoBehaviour
     // not sure what the best form of like. "you found this" is
     // oh maybe an outline would look good?
 
-    // make sure your anchoring system is the same across files and scenes
+    // make sure your anchoring system is the same across files and scenes.
+    //    anchors can be l/r or u/d. may need finagling opposite anchors if diagonal.
     // if spawning different images on each side, csv needs to have one right after the other.
     //    do not separate.
     
@@ -95,10 +96,12 @@ public class SpotTheDifference : MonoBehaviour
                 Button b = go.AddComponent<Button>();
                 b.onClick.AddListener(() => clickDifference(go));
                 b.colors = cbNor;
+                Paralleled p = go.AddComponent<Paralleled>();
 
                 if (images[i].needsInvisibleButton){
                     GameObject rgo = new GameObject();
                     rgo.name = images[i].name + "Inv" + i;
+                    Paralleled rp = rgo.AddComponent<Paralleled>();
                     RectTransform rrt = rgo.AddComponent<RectTransform>();
                     rrt.transform.SetParent(rightAnchor.transform);
                     rrt.sizeDelta = rt.sizeDelta;
@@ -110,16 +113,16 @@ public class SpotTheDifference : MonoBehaviour
                     b = rgo.AddComponent<Button>();
                     b.onClick.AddListener(() => clickDifference(rgo));
                     b.colors = cbTrp;
+                    p.parallel = rgo;
+                    rp.parallel = go;
                 }
                 else{
                     if (prev != null){
-                        Debug.Log("previous");
-                        // p.parallel = prev;
-                        // prev.GetComponent<Paralleled>().parallel = go;
+                        p.parallel = prev;
+                        prev.GetComponent<Paralleled>().parallel = go;
                         prev = null;
                     }
                     else{
-                        Debug.Log("no previous");
                         prev = go;
                     }
                 }
@@ -130,10 +133,12 @@ public class SpotTheDifference : MonoBehaviour
                 Button b = go.AddComponent<Button>();
                 b.onClick.AddListener(() => clickDifference(go));
                 b.colors = cbNor;
+                Paralleled p = go.AddComponent<Paralleled>();
 
                 if (images[i].needsInvisibleButton){
                     GameObject lgo = new GameObject();
                     lgo.name = images[i].name + "Inv" + i;
+                    Paralleled lp = lgo.AddComponent<Paralleled>();
                     RectTransform lrt = lgo.AddComponent<RectTransform>();
                     lrt.transform.SetParent(leftAnchor.transform);
                     lrt.sizeDelta = rt.sizeDelta;
@@ -145,14 +150,16 @@ public class SpotTheDifference : MonoBehaviour
                     b = lgo.AddComponent<Button>();
                     b.onClick.AddListener(() => clickDifference(lgo));
                     b.colors = cbTrp;
+                    p.parallel = lgo;
+                    lp.parallel = go;
                 }
                 else{
                     if (prev != null){
-                        Debug.Log("previous");
+                        p.parallel = prev;
+                        prev.GetComponent<Paralleled>().parallel = go;
                         prev = null;
                     }
                     else{
-                        Debug.Log("no previous");
                         prev = go;
                     }
                 }
@@ -161,9 +168,10 @@ public class SpotTheDifference : MonoBehaviour
     }
 
     public void clickDifference(GameObject go){
-        Debug.Log(go.name + " clicked; ");
+        GameObject pgo = go.GetComponent<Paralleled>().parallel;
+        Debug.Log(go.name + " clicked; " + pgo.name + " paralleled");
         go.GetComponent<Button>().interactable = false;
-
+        pgo.GetComponent<Button>().interactable = false;
 
         //spawn foundShape around clicked difference
         GameObject found = new GameObject();
