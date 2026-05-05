@@ -5,6 +5,8 @@ using UnityEngine.UI;
 // (Image takes up whole screen for easy placement, but the whole screen should not be clickable.)
 // image settings: Sprite (2D and UI); advanced > enable read/write
 
+//usage: object.AddComponent(typeof(ClickOnlyVisible.HideInvisible));
+
 namespace ClickOnlyVisible{
     public class HideInvisible : MonoBehaviour
     {

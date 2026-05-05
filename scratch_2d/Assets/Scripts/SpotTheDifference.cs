@@ -12,8 +12,17 @@ public class SpotTheDifference : MonoBehaviour
     private List<DiffCSV> images;
     private ColorBlock cbTrp;
     private ColorBlock cbNor;
+    private GameObject prev = null;
+
+    private Sprite foundShape;
+    //using a red circle here. make sure the size is bigger than your shape.
+    // might be better to have a thinner circle than i set up...
+    // not sure what the best form of like. "you found this" is
+    // oh maybe an outline would look good?
 
     // make sure your anchoring system is the same across files and scenes
+    // if spawning different images on each side, csv needs to have one right after the other.
+    //    do not separate.
     
     void Start()
     {
@@ -27,8 +36,10 @@ public class SpotTheDifference : MonoBehaviour
         cbNor.highlightedColor = opa;
         cbNor.selectedColor = opa;
         cbNor.pressedColor = opa;
-        cbNor.disabledColor = found;
+        cbNor.disabledColor = opa;
         cbNor.colorMultiplier = 1f;
+
+        foundShape = Resources.Load<Sprite>("spot/circle");
 
         readCSV();
         spawnImages();
@@ -84,6 +95,7 @@ public class SpotTheDifference : MonoBehaviour
                 Button b = go.AddComponent<Button>();
                 b.onClick.AddListener(() => clickDifference(go));
                 b.colors = cbNor;
+
                 if (images[i].needsInvisibleButton){
                     GameObject rgo = new GameObject();
                     rgo.name = images[i].name + "Inv" + i;
@@ -95,10 +107,21 @@ public class SpotTheDifference : MonoBehaviour
                     rrt.pivot = new Vector2(0, 0);
                     rrt.localPosition = rt.localPosition;
                     Image ri = rgo.AddComponent<Image>();
-                    // ri.color = new UnityEngine.Color(0,0,0,0);
                     b = rgo.AddComponent<Button>();
                     b.onClick.AddListener(() => clickDifference(rgo));
                     b.colors = cbTrp;
+                }
+                else{
+                    if (prev != null){
+                        Debug.Log("previous");
+                        // p.parallel = prev;
+                        // prev.GetComponent<Paralleled>().parallel = go;
+                        prev = null;
+                    }
+                    else{
+                        Debug.Log("no previous");
+                        prev = go;
+                    }
                 }
             }
             else if (images[i].presentOnRight){
@@ -107,6 +130,7 @@ public class SpotTheDifference : MonoBehaviour
                 Button b = go.AddComponent<Button>();
                 b.onClick.AddListener(() => clickDifference(go));
                 b.colors = cbNor;
+
                 if (images[i].needsInvisibleButton){
                     GameObject lgo = new GameObject();
                     lgo.name = images[i].name + "Inv" + i;
@@ -118,18 +142,52 @@ public class SpotTheDifference : MonoBehaviour
                     lrt.pivot = new Vector2(0, 0);
                     lrt.localPosition = rt.localPosition;
                     Image li = lgo.AddComponent<Image>();
-                    // li.color = new UnityEngine.Color(0,0,0,0);
                     b = lgo.AddComponent<Button>();
                     b.onClick.AddListener(() => clickDifference(lgo));
                     b.colors = cbTrp;
+                }
+                else{
+                    if (prev != null){
+                        Debug.Log("previous");
+                        prev = null;
+                    }
+                    else{
+                        Debug.Log("no previous");
+                        prev = go;
+                    }
                 }
             }
         }
     }
 
     public void clickDifference(GameObject go){
-        Debug.Log(go.name + " clicked");
+        Debug.Log(go.name + " clicked; ");
         go.GetComponent<Button>().interactable = false;
+
+
+        //spawn foundShape around clicked difference
+        GameObject found = new GameObject();
+        found.name = "found_" + go.name;
+        found.AddComponent(typeof(ClickOnlyVisible.HideInvisible));
+        Image img = found.AddComponent<Image>();
+        img.sprite = foundShape;
+        RectTransform rt = found.GetComponent<RectTransform>();
+        //no clue what a good size difference is
+        // this should actually probably not be a circle
+        // squares or a slightly larger outline would look better
+        RectTransform gort = go.GetComponent<RectTransform>();
+        int sizeDiff = 100;
+        rt.sizeDelta = new Vector2(gort.sizeDelta.x + sizeDiff, gort.sizeDelta.y + sizeDiff);
+        rt.anchorMin = new Vector2(0, 0);
+        rt.anchorMax = new Vector2(0, 0);
+        rt.pivot = new Vector2(0, 0);
+
+        GameObject rfound = GameObjectUtility.DuplicateGameObject(found);
+        rfound.transform.SetParent(rightAnchor.transform);
+        found.transform.SetParent(leftAnchor.transform);
+        
+        rt.localPosition = new Vector2(gort.localPosition.x - sizeDiff/2, gort.localPosition.y - sizeDiff/2);
+        rfound.GetComponent<RectTransform>().localPosition = new Vector2(gort.localPosition.x - sizeDiff/2, gort.localPosition.y - sizeDiff/2);
     }
 }
 
