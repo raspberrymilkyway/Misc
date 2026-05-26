@@ -10,21 +10,17 @@ public class Wanted : MonoBehaviour
     //rewrite some of this to match actual function calls in-game:
     // ad fairy object spawns are handled in separate file
     // poss + randomization unneeded
-    // gonna put a grid in the main thing because i don't feel like handling
-    //   spawn points, but probably don't want that in actual
     public static Wanted wanted;
     
     public GameObject spawnAnchorNoGrid;
     public int spawnMax = 50;
 
-    // movement doesn't work like this yet
     private string[] movementStyle = {"diagonalLeft", "sine", "clock", "sawtooth", "random"};
     private float[] movementSpeed = {0.3f, 0.45f, 0.6f, 0.75f, 0.9f, 1.05f, 1.2f, 1.35f, 1.5f, 1.65f, 1.8f, 1.95f};
     private string path = "wanted/";
     private string[] poss = {"red", "orange", "yellow", "green", "blue", "purple"};
 
-    public int difficulty = 0; //make private in actual
-    private List<string> itlPoss = new List<string>{};
+   private List<string> itlPoss = new List<string>{};
     private int buttonIndex = -1;
     private System.Random rand;
 
@@ -34,10 +30,6 @@ public class Wanted : MonoBehaviour
         //update poss here
         randSpawns();
         loadImages();
-    }
-
-    protected internal void setDifficulty(int diff){
-        difficulty = diff;
     }
 
     public void target(){

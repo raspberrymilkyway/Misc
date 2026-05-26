@@ -31,6 +31,9 @@ public class WantedMovement : MonoBehaviour
     private Vector3 ini;
     private System.Random rand;
 
+    private (float x, float y) parentSize = (0f,0f);
+    private (float x, float y) parentCoor = (0f,0f);
+
     private List<List<float>> styles = new List<List<float>>{
         new List<float>{2.356194f}, //diagonal left
         new List<float>{}, //sine - offset, not angle. generate at start
@@ -49,6 +52,10 @@ public class WantedMovement : MonoBehaviour
             double v = (rand.NextDouble() - 0.5)* 2;
             styles[styles.Count-1].Add((float)v * 6.283185f);
         }
+
+        RectTransform parent = (RectTransform)this.transform.parent;
+        parentCoor = (parent.position.x, parent.position.y);
+        parentSize = (parent.sizeDelta.x, parent.sizeDelta.y);
     }
     
     void Update(){
@@ -188,19 +195,21 @@ public class WantedMovement : MonoBehaviour
     }
     private void checkBounds(){
         // too far? keep bounds
-        // this allows like... half the image off-screen, i think
+        // allows about half the image off-screen
         // https://stackoverflow.com/a/70970228
-        if (transform.position.x < Screen.safeArea.xMin){
-            transform.position = new Vector3(Screen.safeArea.xMax, transform.position.y, 0);
+
+        // bottom left corner is (0,0). swap ifs based on coordinates
+        if (transform.position.x < parentCoor.x){
+            transform.position = new Vector3(parentCoor.x + parentSize.x, transform.position.y, 0);
         }
-        else if (transform.position.x >= Screen.safeArea.xMax){
-            transform.position = new Vector3(Screen.safeArea.xMin, transform.position.y, 0);
+        else if (transform.position.x >= parentCoor.x + parentSize.x){
+            transform.position = new Vector3(parentCoor.x, transform.position.y, 0);
         }
-        if (transform.position.y <= Screen.safeArea.yMin){
-                transform.position = new Vector3(transform.position.x, Screen.safeArea.yMax, 0);
+        if (transform.position.y <= parentCoor.y - parentSize.y){
+                transform.position = new Vector3(transform.position.x, parentCoor.y, 0);
         }
-        else if (transform.position.y >= Screen.safeArea.yMax){
-            transform.position = new Vector3(transform.position.x, Screen.safeArea.yMin, 0);
+        else if (transform.position.y >= parentCoor.y){
+            transform.position = new Vector3(transform.position.x, parentCoor.y - parentSize.y, 0);
         }
     }
 }
