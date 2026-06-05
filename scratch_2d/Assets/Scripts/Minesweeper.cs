@@ -20,7 +20,6 @@ public enum Cover
     Flag
 }
 
-//
 
 public class Minesweeper : MonoBehaviour
 {
@@ -339,7 +338,7 @@ public class Minesweeper : MonoBehaviour
         }
         Image img = coverAnchor.transform.GetChild(x).GetChild(y).GetComponent<Image>();
         if (right){
-            if (coverVisible[x][y] == Cover.Solid){
+            if (coverVisible[x][y] == Cover.Solid && minesLeft > 1){
                 img.sprite = Resources.Load<Sprite>("minesweeper/flag");
                 coverVisible[x][y] = Cover.Flag;
                 minesLeft--;
